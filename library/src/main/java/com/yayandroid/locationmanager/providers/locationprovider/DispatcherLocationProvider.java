@@ -1,5 +1,6 @@
 package com.yayandroid.locationmanager.providers.locationprovider;
 
+import android.app.Activity;
 import android.app.Dialog;
 import android.content.DialogInterface;
 import android.content.Intent;
@@ -160,7 +161,12 @@ public class DispatcherLocationProvider extends LocationProvider implements Cont
 
     void resolveGooglePlayServices(int gpServicesAvailability) {
         LogUtils.logI("Asking user to handle GooglePlayServices error...");
-        gpServicesDialog = getSourceProvider().getGoogleApiErrorDialog(getActivity(), gpServicesAvailability,
+        Activity activity = getActivity();
+        if (activity == null) {
+            continueWithDefaultProviders();
+            return;
+        }
+        gpServicesDialog = getSourceProvider().getGoogleApiErrorDialog(activity, gpServicesAvailability,
               RequestCode.GOOGLE_PLAY_SERVICES, new DialogInterface.OnCancelListener() {
                   @Override
                   public void onCancel(DialogInterface dialog) {
@@ -171,7 +177,9 @@ public class DispatcherLocationProvider extends LocationProvider implements Cont
               });
 
         if (gpServicesDialog != null) {
-            gpServicesDialog.show();
+            if (!activity.isFinishing()) {
+                gpServicesDialog.show();
+            }
         } else {
             LogUtils.logI("GooglePlayServices error could've been resolved, but since LocationManager "
                   + "is not running on an Activity, dialog cannot be displayed.");

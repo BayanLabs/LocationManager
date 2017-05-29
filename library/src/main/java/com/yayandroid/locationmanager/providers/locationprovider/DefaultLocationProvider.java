@@ -1,5 +1,6 @@
 package com.yayandroid.locationmanager.providers.locationprovider;
 
+import android.app.Activity;
 import android.app.Dialog;
 import android.content.Intent;
 import android.location.Location;
@@ -117,11 +118,18 @@ public class DefaultLocationProvider extends LocationProvider
     }
 
     void askForEnableGPS() {
+        Activity activity = getActivity();
+        if (activity == null) {
+            return;
+        }
+
         DialogProvider gpsDialogProvider = getConfiguration().defaultProviderConfiguration().gpsDialogProvider();
         gpsDialogProvider.setDialogListener(this);
 
-        gpsDialog = gpsDialogProvider.getDialog(getActivity());
-        gpsDialog.show();
+        gpsDialog = gpsDialogProvider.getDialog(activity);
+        if (!activity.isFinishing()) {
+            gpsDialog.show();
+        }
     }
 
     void onGPSActivated() {
